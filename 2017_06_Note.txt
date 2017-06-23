@@ -1,0 +1,288 @@
+2017/06/02
+-----------
+1、MyBatias的sql语句随便写，主要是封装返回类型(resultType或resultMap)
+	resultType:指定了什么类型，调用时一定要用相应的类型去接
+	resultMap:它的类型由<resultMap type="类型">指定，同样用相应的类型去接
+	一般来说常用的有两种返回类型: "map" 和 "entity"实体
+
+2、返回为"map"型时，查询字段为 null 时是不返回的，若想返回有两种方法:
+	1)在config.xml文件中添加:(注意配置文件中的各配置属性是有顺序的)
+		<settings>  
+	      <setting name="cacheEnabled" value="true"/>   
+	        <setting name="callSettersOnNulls" value="true"/>  
+	    </settings>
+	    例: 返回 "age = null"
+	  注意:只有 MyBatis3.2 以上才可用
+	2)建立一个类，实现Mybatis的TypeHandler接口
+		public class EmptyStringIfNull implements TypeHandler<String> {
+
+		    @Override
+		    public String getResult(ResultSet rs, String columnName) throws SQLException {
+			 return (rs.getString(columnName) == null) ? "" : rs.getString(columnName); 
+		    }
+
+		    @Override
+		    public String getResult(ResultSet rs, int columnIndex) throws SQLException {
+			 return (rs.getString(columnIndex) == null) ? "" : rs.getString(columnIndex);
+		    }
+		    @Override
+		    public String getResult(CallableStatement cs, int columnIndex)   throws SQLException {
+			 return (cs.getString(columnIndex) == null) ? "" : cs.getString(columnIndex);
+		    }
+
+		    @Override
+		    public void setParameter(PreparedStatement ps, int arg1, String str, JdbcType jdbcType) throws SQLException {}
+		} 
+	 	在映射时添加 typeHandler 属性，映射到该类
+	 	例如：<result  property="age" column="age" typeHandler="*.EmptyStringIfNull">
+		      返回 "age ="
+	  注意: 只应用于resultMap
+
+3、一些问题
+	字段为 null 和为 "" 是不同的概念, Mybaitis
+	返回类型为 map 时，只返回不为 null 的字段，为""时，返回age=
+	返回类型为 entity 时，字段为 null 时返回实体属性的初始值
+
+
+2017/06/06
+-----------
+1.sql语句:
+	select t1.*,t2.* from dept t1,emp t2 where t1.deptno=t2.deptno(+);
+	即使t2(emp表)中不存在匹配的记录，在t1(dept表)也查询出来
+
+
+2017/06/08
+-----------
+1. js函数提升(函数定义方式提升)
+	不可行：var a = funtion(){ b(); ...}         可行：var a = function(){}
+			a(); //报错，b未定义前调用                 a(); //正确，b提升
+			var b = function(){...};				   function b(){...};
+2.Angularjs
+	1) ng-if: 等于"false"时移除该元素(ng-show 是隐藏该元素)
+	2) ng-repeat: 循环取值
+	   例：ng-repeat=" country in counrtyList"
+	   		country是countryList中的一个对象
+
+
+2017/06/09
+-----------
+1、@Test 测试sql
+	1) 需要加jUnit.jar包
+	2) 在框架环境下测试，可能需要调用自己定义的方法，这时需要框架环境和配置信息
+		例：在Spring下
+		@RunWith(SpringJUnit4ClassRunner.class)
+		@ContextConfiguration(locations="classpath:resources/main/db/xml/db_mybatis.xml")
+	3) 在有多个 @Test 函数时，每一个 @Test 函数名称需要写成 testXX() 的形式
+	4) 每个 @Test 函数都是单独的一个测试环境，互相没有影响，即使上其他函数改变了其中的属性值，
+		若希望函数之间有影响，可以加 @Before 和 @After
+
+2、Angularjs	
+	1) <select> 下拉框选择标签
+	   	ng-modle: 必须有，用来动态显示所选择的的元素，绑定的是提交的值
+	  * ng-options: 循环对象并生成多个option
+			应用：二级代码: 
+			ng-options="x.id as x.lable for x in codeList"
+			x.id 是提交的值；x.lable 是显示的值
+	   	<option value="">: 单个 option 标签，这样可设置默认显示值
+
+3、eclipse 配置信息导入
+	在workspace中 .metadata\.plugins\org.eclipse.core.runtime\.settings 将整个.settings文件夹拷入新的workspace中
+
+4、@Autowired 和 @Resource  Spring自动装配Bean
+	共同点：两者都可以写在字段和setter方法上。两者如果都写在字段上，那么就不需要再写setter方法。
+	不同点：@Autowired 为Spring提供的注解，默认按类型进行装配
+			@Resource 为J2EE提供的注解，默认按名称进行装配
+
+5、mybatis-spring
+	sqlSession 是一个接口
+	1) 在 mybatis 中，会默认有两个实现类 DefaultSqlSession(目前使用) 和 SqlSessionManager(已弃用) 
+		这两个实现类都是线程不安全的
+	2) 在 mybatis-spring 中使用了sqlSessionTemplate 它是线程安全的
+		sqlSessionTemplate 实现了sqlSession 接口 
+		利用 setSqlSessionFactory(SqlSessionFactory sqlSessionFactory)
+		  或 setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate)
+		来获取 线程安全的 sqlSession
+
+6、子类访问父类的 private 属性
+	private 的属性是不能被继承的，但是可以被访问
+	父类中有公共的访问方法，这样子类便可以访问到相应的私有属性
+
+
+2017/06/12
+-----------
+1、PO 和 DTO
+	PO: 持久化对象，完全对应数据库的表结构。
+		一个PO就是数据库中的一条记录。好处是可以把一条记录作为一个对象处理，可以方便的转为其它对象。
+	DTO: 主要用于远程调用等需要大量传输对象的地方。
+		比如我们一张表有100个字段，那么对应的PO就有100个属性。
+		但是我们界面上只要显示10个字段，
+		客户端用WEB service来获取数据，没有必要把整个PO对象传递到客户端，
+		这时我们就可以用只有这10个属性的DTO来传递结果到客户端，这样也不会暴露服务端表结构.到达客户端以后，如果用这个对象来对应界面显示，那此时它的身份就转为VO
+	VO: 对应界面显示的数据对象，用一个VO对象对应整个界面的值
+
+2、所有从前台传入的数据都是json形式的，需要经过以下两步转换成后台可处理的JavaBean
+	1) JavaBean -> JSON文本: JSONObject.toJSONString(o)//一般从前台传到后台的 json 都要经此步骤转换
+	2) JSON文本 -> JavaBean: JSON.parseObject(JSONObject.toJSONString(o), HashMap.class);//Class类型可自定义，也可反射得到
+
+
+2017/06/13
+-----------
+1、Nginx: 反向代理
+	注意：不要放在中文目录下
+
+
+2017/06/15
+-----------
+1、HashCode
+	HashCode 是由对象导出的整数值，用来判断两个对象是否相等
+	Equals 必须与 HashCode 定义一致，即 x.hashCode() == y.hashCode() => x.equals(y) == true
+	String 的 HashCode 是由内容导出的，因此内容相同 equals 返回 true
+	StringBuffer 的 HashCode 是由 Object 默认方法导出的存储地址，与内容无关
+
+2、Map & List
+
+	最简洁的总结：
+		两者都只是接口，List是 value 的集合，Map 是 key/value 的集合
+
+	集合具体总结：
+		List、Set 继承了 Collection接口，Map 与 Collection 同级
+		Collection 是最基本的集合接口，一个Collection代表一组Object，即Collection的元素。Java JDK不能提供直接继承自Collection的类，Java JDK提供的类都是继承自Collection的"子接口"，如:List和Set。 
+		注意：Map没有继承Collection接口，Map提供key到value的映射。一个Map中不能包含相同key，每个key只能映射一个value。Map接口提供3种集合的视图，Map的内容可以被当做一组key集合，一组value集合，或者一组key-value映射。 
+		List按对象进入的顺序保存对象，不做排序或编辑操作。Set对每个对象只接受一次，并使用自己内部的排序方法(通常，你只关心某个元素是否属于Set,而不关心它的顺序--否则应该使用List)。Map同样对每个元素保存一份，但这是基于"键"的，Map也有内置的排序，因而不关心元素添加的顺序。如果添加元素的顺序对你很重要，应该使用 LinkedHashSet或者LinkedHashMap.
+
+	详细介绍： 
+		List特点：元素有放入顺序，元素可重复 
+		Set特点：元素无放入顺序，元素不可重复（注意：元素虽然无放入顺序，但是元素在set中的位置是有该元素的HashCode决定的，其位置其实是固定的） 
+		Map特点：元素按键值对存储，无放入顺序，key不重复
+
+		List接口有三个实现类：LinkedList，ArrayList，Vector 
+		LinkedList：底层基于链表实现，链表内存是散乱的，每一个元素存储本身内存地址的同时还存储下一个元素的地址。链表增删快，查找慢 
+		ArrayList和Vector的区别：ArrayList是非线程安全的，效率高；Vector是基于线程安全的，效率低 
+
+		Set接口有两个实现类：HashSet(底层由HashMap实现)，LinkedHashSet 
+		SortedSet接口有一个实现类：TreeSet（底层由平衡二叉树实现） 
+		Query接口有一个实现类：LinkList 
+
+		Map接口有三个实现类：HashMap，HashTable，LinkeHashMap 
+		  HashMap非线程安全，高效，支持null；HashTable线程安全，低效，不支持null 
+		SortedMap有一个实现类：TreeMap 
+		其实最主要的是，list是用来处理序列的，而set是用来处理集的。Map是知道的，存储的是键值对 
+
+3、MyBatis 批量操作数据库（增删改）
+	在 sqlSession 中，insert 和 delete 就是 update，仅由调用的 sql 语句来区别。
+	ExecutorType 有三种模式，默认的是 simple 
+	Spring 中，在同一事务中的 batch 模式和 simple 模式之间无法转换，项目一般选择 simple 模式，所以 batch 需要单独事务设置
+	步骤：
+		1) SqlSession batchSqlSession = sqlSessionTemplate.getSqlSessionFactory().openSession(ExecutorType.BATCH, false);
+		2) 每当 ListNum = commitNum 时，执行 batchSqlSession.flushStatements();
+		3) 注意这个 batchSqlSession 脱离了 Spring 的事务管理，需要单独设置:
+			catch (Exception e) {
+					batchSqlSession.rollback(); // 发生错误回滚
+					e.printStackTrace(); // 打印报错位置
+				} finally {
+					if (batchSqlSession != null) {
+						batchSqlSession.flushStatements(); // 剩下的数据更新
+						batchSqlSession.close();  // 关闭事务
+					}
+
+
+2017/06/16
+-----------
+1、存储过程
+	在数据库端叫“存储过程”，在编程中就是 PrepareStatement
+	Statement 和 PrepareStatement 对比
+	1) Statement 用法
+		String sql = "select * from users where  username= '"+username+"' and userpwd='"+userpwd+"'";  
+		stmt = conn.createStatement();  
+		rs = stmt.executeQuery(sql);  
+
+	2) PrepareStatement 用法
+		String sql = "select * from users where  username=? and userpwd=?";  
+		pstmt = conn.prepareStatement(sql);  
+		pstmt.setString(1, username);  
+		pstmt.setString(2, userpwd);  
+		rs = pstmt.executeQuery();  
+	3) PrepareStatement 是预编译的,对于批量处理可以大大提高效率。
+	   Statement每次执行sql语句，相关数据库都要执行sql语句的编译，在对数据库只执行一次性存取的时侯应用
+	4) PrepareStatement 安全的，可以避免sql注入
+	   例如：where  username=? 我们传进去“or 1=1”
+	   		 在 Statement 下，这是永真式，但在 PrepareStatement 下，它只会查找名字等于传入值用户
+
+2、Restful架构
+	Rest(Representational State Transfer) 表现层状态转化
+	Java 后端：JAX-RS 规范
+
+
+2017/06/19
+-----------
+1、SpringMVC 结合 JAX-RS
+	在 web.xml 里添加 JAX-RS Servlet
+	@Consumes()请求信息的格式 -> Headers中的Content-type
+	@Produces()要求响应实体的格式 -> Headers中的Accept
+	
+
+2017/06/20
+-----------
+1、Java动态代理   /* test_extend.proxy */
+	目的：为其他对象提供一个代理以控制对某个对象的访问
+	作用：能有效控制对委托类对象的直接访问；
+		  也可以很好地隐藏和保护委托类对象；
+		  同时也为实施不同控制策略预留了空间，从而在设计上获得了更大的灵活性。
+	要素：公共接口，委托类(实现类)，代理类
+注意：对用户来说操作的是接口对象，实际上是实现类的对象
+步骤：
+	1)// InvocationHandlerImpl 实现了 InvocationHandler 接口，并能实现方法调用从代理类到委托类的分派转发
+	  // 其内部通常包含指向委托类实例的引用，用于真正执行分派转发过来的方法调用
+	  InvocationHandler handler = new InvocationHandlerImpl(..); 
+	  //在类 InvocationHandlerImpl 中需要重写 invoke(){.. method.invoke(委托类对象，args) ..} 方法
+	
+	2)// 通过 Proxy 为包括 Interface 接口在内的一组接口动态创建代理类的类对象
+	  Class clazz = Proxy.getProxyClass(classLoader, new Class[] { Interface.class, ... }); 
+	 
+	3)// 通过反射从生成的类对象获得构造函数对象
+	  Constructor constructor = clazz.getConstructor(new Class[] { InvocationHandler.class }); 
+	 
+	4)// 通过构造函数对象创建动态代理类实例
+  	  Interface Proxy = (Interface)constructor.newInstance(new Object[] { handler });
+
+  	2) ~ 4)可以合并为一步
+  		Interface proxy = (Interface)Proxy.newProxyInstance( classLoader, 
+	     new Class[] { Interface.class }, 
+	     handler );
+	java.lang.ClassLoader：这是类装载器类，负责将类的字节码装载到 Java 虚拟机(JVM)中并为其定义类对象， 然后该类才能被使用。
+	Proxy 静态方法生成动态代理类同样需要通过类装载器来进行装载才能使用，它与普通类的唯一区别就是其字节码是由 JVM 在运行时动态生成的而非预存在于任何一个 .class 文件中。
+
+2、Spring 的核心思想 AOP 就是用的动态代理
+
+
+2017/06/22
+-----------
+1、git 使用代理服务器
+	git config --global http.proxy http://dong_tt:911Gundam87@proxy.neusoft.com:8080
+	git config --global https.proxy http://dong_tt:911Gundam87@proxy.neusoft.com:8080
+
+
+2017/06/23
+-----------
+以下都是关于 Spring+AspectJ 实现AOP的相关内容
+
+1、@Component("beanName")  /* test_extend.proxy.aop */
+	括号里是指定所注入类的 bean 名称，若不指定，默认为类名的驼峰式命名，例：helloImpl
+
+2、JoinPoint  表示连接点对象,
+	方法：
+	1) Object[] getArgs()：获取连接点方法运行时的入参列表； 
+  2) Signature getSignature() ：获取连接点的方法签名对象； 
+  3) Object getTarget() ：获取连接点所在的目标对象； 
+  4) Object getThis() ：获取代理对象本身； 
+
+3、Object[] 遍历输出 用 Arrays.asList()	  /* test_extend.Test.TestAsList.java */
+	 * 使用时注意
+	 * 1. 基本数据类型：整个数组会当成一个元素存入List中
+	 *   解决方法： 1) 取List数组第一个元素进行遍历
+	 *   		    2) ArrayUtils.toObject(int[] args) 先转成 Object[]
+	 * 		
+	 * 2. 该方法返回的并不是真正的 ArrayList,而是其中的一个内部类，并没有实现add、remove等更新方法，
+	 *    因而对返回的 List 进行操作的时候会抛异常  UnsupportedOperationException 
+
+4、JDK是基于接口的代理，从 XML 中得到的 Bean 都是接口类型的，代理对象只能访问到接口里有的方法
