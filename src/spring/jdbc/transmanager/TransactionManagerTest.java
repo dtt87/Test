@@ -1,8 +1,10 @@
-package spring.jdbc;
+package spring.jdbc.transmanager;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -17,11 +19,12 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 import spring.jdbc.Employee;
 
-public class JDBCTest {
+public class TransactionManagerTest {
 	
 	private ApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext-JDBC.xml");
 	private JdbcTemplate jdbcTemplate  = (JdbcTemplate) ctx.getBean("jdbcTemplate");
-	private EmployeeDao employeeDao = (EmployeeDao) ctx.getBean("employeeDaoImpl");
+	private BookShopDao bookShopDao = (BookShopDao) ctx.getBean("bookShopDao");
+	private BookShopService bookShopService = (BookShopService) ctx.getBean("bookShopService");
 	
 	@Test
 	public void testDataSource() throws SQLException {
@@ -30,38 +33,31 @@ public class JDBCTest {
 	}
 	
 	@Test
-	public void testUpdate(){
-		String sql = "UPDATE employees SET last_name = ? WHERE id = ?";
-		jdbcTemplate.update(sql, "Jack", 1);
+	public void testBookShopDaoFindPriceByIsbn(){		
+		int price = bookShopDao.findBookPriceByIsbn("1001");
+		System.out.println(price);
 	}
 	
 	@Test
-	public void testBatchUpdate(){
-		
-		String sql = "insert into employees (last_name, email, dept_id) values (?,?,?)";
-		
-		List<Object[]> batchArgs = new ArrayList<>();
-		batchArgs.add(new Object[]{"AA", "aa@atguigu.com", 1});
-		batchArgs.add(new Object[]{"BB", "bb@guigu.com", 2});
-		
-		jdbcTemplate.batchUpdate(sql, batchArgs);
-		
+	public void testBookShopDaoUpdateBookStock(){
+		bookShopDao.updateBookStock("1001");
 	}
 	
 	@Test
-	public void testQueryForObject(){
-		String sql = "SELECT id, last_name lastName, email, dept_id as \"department.id\" FROM employees WHERE id = ?";
-		RowMapper<Employee> rowMapper = new BeanPropertyRowMapper<>(Employee.class);
-		Employee employee = jdbcTemplate.queryForObject(sql, rowMapper, 1);
-		
-		System.out.println(employee);
+	public void testBookShopDaoUpdateUserAccount(){
+		bookShopDao.updateUserAccount("AA", 100);
 	}
 	
 	@Test
-	public void testEmployeeDao(){
-		
-		System.out.println(employeeDao.get(1));
+	public void testPurchase(){
+		bookShopService.purchase("AA", "1001");
 	}
 	
-	
+	@Test
+	public void testPurchaseMore(){
+		Map<String, Integer> bookMap = new HashMap();
+		bookMap.put("1001", 2);
+		bookMap.put("1002", 3);
+		bookShopService.purchaseMore("AA", bookMap);
+	}
 }

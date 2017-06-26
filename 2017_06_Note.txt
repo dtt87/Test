@@ -286,3 +286,14 @@
 	 *    因而对返回的 List 进行操作的时候会抛异常  UnsupportedOperationException 
 
 4、JDK是基于接口的代理，从 XML 中得到的 Bean 都是接口类型的，代理对象只能访问到接口里有的方法
+
+2017/06/26
+-----------
+
+1、try catch 
+	捕获异常，不影响后面程序的执行，否则程序停止
+	try {
+		if( stock < 0) throw (new BookStockException("库存不足！")); //抛出异常
+	} catch (BookStockException e) {  // 捕获异常
+		System.out.println(e.getMessage());
+	}
