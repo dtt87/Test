@@ -3,8 +3,10 @@ package spring.jdbc.transmanager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
@@ -55,9 +57,14 @@ public class TransactionManagerTest {
 	
 	@Test
 	public void testPurchaseMore(){
-		Map<String, Integer> bookMap = new HashMap();
+		Map<String, Integer> bookMap = new LinkedHashMap();
 		bookMap.put("1001", 2);
-		bookMap.put("1002", 3);
+		bookMap.put("1002", 3);	
+		for(Entry<String, Integer> book : bookMap.entrySet() ){
+			System.out.println( book.getKey() + book.getValue());
+			
+		}
 		bookShopService.purchaseMore("AA", bookMap);
+		
 	}
 }

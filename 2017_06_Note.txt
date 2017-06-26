@@ -297,3 +297,7 @@
 	} catch (BookStockException e) {  // 捕获异常
 		System.out.println(e.getMessage());
 	}
+
+2、遍历 Map
+	若想保证 Map 的输出顺序与存放顺序保持一致，使用LinkedHashmap
+	Map<Object, Object> map = new LinkedHashMap();

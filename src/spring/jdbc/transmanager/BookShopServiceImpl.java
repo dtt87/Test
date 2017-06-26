@@ -37,7 +37,7 @@ public class BookShopServiceImpl implements BookShopService {
 		}		
 	}
 
-	@Transactional(propagation=Propagation.REQUIRES_NEW)
+	@Transactional
 	@Override
 	public void purchaseByCount(String username, String isbn, int count) {
 		// TODO Auto-generated method stub
@@ -46,11 +46,16 @@ public class BookShopServiceImpl implements BookShopService {
 		}
 	}
 	
-//	@Transactional(propagation=Propagation.REQUIRES_NEW)
+	/**
+	 * 买书，不同书，数量不同
+	 * bookMap = {1001: 2, 1002: 3}
+	 */
+	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	@Override
 	public void purchaseMore(String username, Map<String, Integer> bookMap) {
 		// TODO Auto-generated method stub
 		for(Entry<String, Integer> book : bookMap.entrySet() ){
+//			System.out.println( book.getKey() + book.getValue());
 			purchaseByCount(username, book.getKey(), book.getValue());
 		}
 		
