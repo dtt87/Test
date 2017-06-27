@@ -9,7 +9,7 @@ public class Main {
 		
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContext-aop-xml.xml");
 		Hello hello =  (Hello) ctx.getBean("hello");
-		System.out.println(hello.getClass().getName());
+		//System.out.println(hello.getClass().getName());
 		
 		hello.sayHello("Jack");
 //		System.out.println(res);
