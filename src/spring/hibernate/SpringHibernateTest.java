@@ -1,6 +1,9 @@
 package spring.hibernate;
 
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -34,5 +37,31 @@ public class SpringHibernateTest {
 	public void testUpdateBookStock(){
 		bookShopDao.updateBookStock("1001");
 	}
-
+	
+	@Test
+	public void testUpdateUserAccount(){
+		bookShopDao.updateUserAccount("AA", 100);
+	}
+	
+	@Test
+	public void testPurchase(){
+		bookShopService.purchase("AA", "1001");
+	}
+	
+	@Test 
+	public void testPurchaseMore(){
+		Map<String, Integer> book = new LinkedHashMap<>();
+		book.put("1001", 1);
+		book.put("1002", 2);
+		bookShopService.purchaseMore("AA", book);
+	}
+	
+	@Test
+	public void testSaveBookStock(){
+		Map<Object, Object> map = new HashMap<>();
+		map.put("1003", 3);
+		map.put("1002", 2);
+		bookShopDao.saveBookStock(map);
+	}
+	
 }

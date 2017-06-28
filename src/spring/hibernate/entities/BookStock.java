@@ -3,23 +3,34 @@ package spring.hibernate.entities;
 import java.io.Serializable;
 import javax.persistence.*;
 
+
 /**
  * The persistent class for the book_stock database table.
  * 
  */
 @Entity
-@Table(name = "book_stock")
-@NamedQuery(name = "BookStock.findAll", query = "SELECT b FROM BookStock b")
+@Table(name="book_stock")
+@NamedQuery(name="BookStock.findAll", query="SELECT b FROM BookStock b")
 public class BookStock implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private int id;
+
 	private String isbn;
 
 	private int stock;
 
 	public BookStock() {
+	}
+
+	public int getId() {
+		return this.id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public String getIsbn() {

@@ -53,7 +53,7 @@ public class BookShopServiceImpl implements BookShopService {
 	 * 买书，不同书，数量不同
 	 * bookMap = {1001: 2, 1002: 3}
 	 */
-	@Transactional(propagation=Propagation.REQUIRES_NEW)
+//	@Transactional(propagation=Propagation.REQUIRES_NEW)
 	@Override
 	public void purchaseMore(String username, Map<String, Integer> bookMap) {
 		// TODO Auto-generated method stub

@@ -1,5 +1,7 @@
 package spring.hibernate.dao;
 
+import java.util.Map;
+
 public interface BookShopDao {
 	
 	public int findBookPriceByIsbn(String isbn);
@@ -8,5 +10,5 @@ public interface BookShopDao {
 	
 	public void updateUserAccount(String username, int price);
 	
-	
+	public void saveBookStock(Map <Object, Object> map);
 }

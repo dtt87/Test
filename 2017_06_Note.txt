@@ -316,7 +316,8 @@
 
 2、Hibernate 事务
 	使用 Hibernate 一定要配置和使用事务，否则会出现 getCurrentSession() 为空的情况
-
+	使用位置：有getCurrentSession()方法的层中，一般在 Dao 层
+	
 3、JPA 和 Hibernate
 	JPA(Java Persistence API)：通过JDK 5.0注解或XML描述对象－关系表的映射关系, 并将运行期的实体对象持久化到数据库中。
 	总的来说，JPA是规范，Hibernate是框架，JPA是持久化规范，而Hibernate实现了JPA。
