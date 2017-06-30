@@ -60,7 +60,7 @@ public class BookShopDaoImpl implements BookShopDao {
 
 		String hql = "update BookStock set stock = stock-1 where isbn = ?";
 		getSession().createQuery(hql).setString(0, isbn).executeUpdate();
-
+		
 	}
 
 	@Transactional
