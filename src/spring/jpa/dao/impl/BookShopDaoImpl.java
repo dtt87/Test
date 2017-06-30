@@ -1,4 +1,4 @@
-package spring.hibernate.dao.impl;
+package spring.jpa.dao.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +18,7 @@ import spring.hibernate.BookStockException;
 import spring.hibernate.UserAccountException;
 import spring.hibernate.dao.BookShopDao;
 import spring.hibernate.entities.BookStock;
+import spring.jpa.repository.BookRepository;
 
 @Repository("bookShopDao")
 public class BookShopDaoImpl implements BookShopDao {
@@ -30,16 +31,21 @@ public class BookShopDaoImpl implements BookShopDao {
 
 	}
 	
+	@Autowired
+	private BookRepository bookRepository;	
 //	private Transaction tx = getSession().beginTransaction();  
 
 	@Transactional
 	@Override
 	public int findBookPriceByIsbn(String isbn) {
 		// TODO Auto-generated method stub
-		// int price = sessionFactory.queryForObject(sql, Integer.class, isbn);
-		String hql = "SELECT b.price FROM Book b WHERE b.isbn = ?";
-		Query query = getSession().createQuery(hql).setString(0, isbn);
-		return (Integer) query.uniqueResult();
+//		String hql = "SELECT b.price FROM Book b WHERE b.isbn = ?";
+//		Query query = getSession().createQuery(hql).setString(0, isbn);
+//		return (Integer) query.uniqueResult();
+		
+		// 使用 SpringDataJPA 
+		int price = bookRepository.findByIsbn(isbn);
+		return price;
 	}
 
 	@Transactional
@@ -60,7 +66,7 @@ public class BookShopDaoImpl implements BookShopDao {
 
 		String hql = "update BookStock set stock = stock-1 where isbn = ?";
 		getSession().createQuery(hql).setString(0, isbn).executeUpdate();
-		
+
 	}
 
 	@Transactional

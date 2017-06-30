@@ -326,3 +326,61 @@
 4、Sql 和 Hql
 	sql: 就是简单的数据库语句，操作的是数据库
 	Hql: 操作的是对象，就是 @Entity 标注的实体
+
+
+2017/06/29
+-----------
+1、Spring Data JPA 和 hibernate 结合
+	简化开发，只需写接口，不用写实现类
+	public interface BookRepository extends JpaRepository<Book, String> {	
+		public Book findByName(String name);
+	}
+
+
+2017/06/30
+-----------
+1、持久化工具，用来操作数据库的对象
+	Hibernate: session
+	MyBatis: sqlSession
+	Spring Data JPA: entityManager
+
+2、Hibernate 持久化
+	将数据库数据加载到 session 中
+	将程序数据在持久状态和瞬间状态转换的机制
+	三种状态：
+		瞬时状态 -> 对象在内存中开辟空间，new对象，存在于内存中；
+		持久状态 -> 永久保存，以文件、数据库、xml 的形式存在；
+		游离状态 -> 已经持久化的对象脱离 session 的管理，不存在于session中了
+
+3、Hibernate 操作流程
+	原生 Hibernate     								Spring + Hibernate
+	1) 创建SessionFactory							1) IOC容器 获取 SessionFactory
+		SessionFactory factory  						@Autowired
+			= cfg.buildSessionFactory();  				SessionFactory factory;
+	2) 开启session  								2) 获取当前线程的 Session
+      	Session session = factory.openSession();  		factory.getCurrentSession();
+    3) 开启事务  									3) 由 Spring 管理事务
+        session.beginTransaction();  					@Transactional 方法前添加注释
+    4) 执行对象 CRUD 操作 	 	 					4) 执行对象 CRUD 操作
+    	CreatQuery(hql)									CreatQuery(hql)
+    5) 提交事务 									5~7步全部由 Spring 来完成	
+    	session.getTransaction().commit();  
+    6) 异常回滚
+    7) 关闭 Session
+    	session.close();
+
+4、程序中序列化问题	implements Serializable
+	1) 实体都需要序列化
+		实体对象是数据库层、底层交换数据的载体
+	2) 涉及到前后台数据交换的 java 类都要序列化 (VO、DTO)
+		web服务器通常将那些暂时不活动但未超时的HttpSession对象转移到文件系统或数据库中保存，服务器要使用他们时再将他们从文件系统或数据库中装载入内存，这种技术称为Session的持久化。
+
+*************
+6月总结
+1、主要学习了数据库层的基本知识
+	MyBatise、Hibernate、Spring Data JPA 会用
+2、Spring 内容基本学完
+	AOP、动态代理
+
+7月目标：
+	SpringMVC、web Service

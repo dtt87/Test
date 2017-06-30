@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.8.xsd"
+		default-lazy-init="true">
+		
+	
+	<!-- 1.配置自动扫描的包 -->
+	<context:component-scan base-package="spring.jpa"></context:component-scan>
+	
+	<!-- 2.配置数据源 -->	
+	<!-- 导入数据库资源文件 -->
+	<context:property-placeholder location="classpath:db.properties"/>
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="user" value="${jdbc.user}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+		<property name="driverClass" value="${jdbc.driverClass}"></property>
+		<property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+		<property name="initialPoolSize" value="${jdbc.initPoolSize}"></property>
+		<property name="maxPoolSize" value="${jdbc.maxPoolSize}"></property>
+	</bean>
+	
+	<!-- 3.定义实体管理器工厂  entityManagerFactory
+         Jpa配置   LocalContainerEntityManagerFactoryBean这个选项Spring扮演了容器的角色，
+              	完全掌管JPA -->
+	<bean id="entityManagerFactory" 
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">		
+		<!-- 配置数据源属性 -->
+		<property name="dataSource" ref="dataSource"></property>
+		
+		<!-- 指定Jpa持久化实现厂商类, 这里以Hibernate为例 -->
+        <property name="jpaVendorAdapter" ref="hibernateJpaVendorAdapter"/> 
+		
+		<!-- 使用注解的方式, 扫描Entities实体包 -->
+		<property name="packagesToScan" >
+			<list>
+				<value>spring.jpa.entities</value>
+			</list>
+		</property>
+		
+		<!-- 使用 jpaProperties 属相来配置 Hibernate 原生的属性 -->
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>				
+			</props>
+		</property>		
+	</bean>
+	
+	<!-- 4.重要配置：启用扫描并自动创建代理的功能 -->
+	<jpa:repositories base-package="com.neusoft.cloudweb.common.repos"
+		transaction-manager-ref="transactionManager"
+		entity-manager-factory-ref="entityManagerFactory" />
+	
+	<!-- Hibernate对Jpa的实现 -->
+	<bean id="hibernateJpaVendorAdapter"
+		class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+	
+	<!-- 5.配置 JPA 的声明式事务 -->
+	<!-- 配置事务管理器 -->
+	<bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory"></property>
+	</bean>	
+	<!-- 启用事务注解 -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+
+	<!-- 2. 配置事务属性, 需要事务管理器 -->
+	<!-- 
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="get*" read-only="true"/>
+			<tx:method name="purchase" propagation="REQUIRES_NEW"/>
+			<tx:method name="*"/>
+		</tx:attributes>
+	</tx:advice>
+ -->
+	<!-- 3. 配置事务切点, 并把切点和事务属性关联起来 -->
+	<!-- 
+	<aop:config>
+		<aop:pointcut expression="execution(* spring.hibernate.service.*.*(..))" 
+			id="txPointcut"/>
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut"/>
+	</aop:config>
+ -->
+</beans>
